@@ -171,6 +171,17 @@ async function main() {
   const stats = await call('GET', '/admin/stats', { token: admin });
   check('admin stats return counts', stats.data.stats?.users.admin === 1 && stats.data.stats.courses.total === 5);
 
+  const riyaId = (await call('GET', '/auth/me', { token: riya })).data.user._id;
+  const ac = await call('POST', '/courses', { token: admin, body: { title: 'Admin Course', description: 'by admin', instructor: riyaId } });
+  check('admin-created course is approved and assigned', ac.status === 201 && ac.data.course.status === 'approved' && String(ac.data.course.instructor) === riyaId);
+  check('admin course without instructor is owned by admin', String((await call('POST', '/courses', { token: admin, body: { title: 'Own', description: 'x' } })).data.course?.instructor) === adminMe._id);
+  check('admin cannot assign a student as instructor', (await call('POST', '/courses', { token: admin, body: { title: 'X', description: 'x', instructor: rahulUser._id } })).status === 400);
+  const ic = await call('POST', '/courses', { token: riya, body: { title: 'Inst', description: 'x', instructor: adminMe._id } });
+  check('instructor cannot assign another owner (stays pending, own)', ic.data.course?.status === 'pending' && String(ic.data.course.instructor) === riyaId);
+  for (const id of [ac.data.course?._id, ic.data.course?._id]) if (id) await call('DELETE', `/courses/${id}`, { token: admin });
+  const own = (await call('GET', '/admin/courses', { token: admin })).data.courses.find((c) => c.title === 'Own');
+  if (own) await call('DELETE', `/courses/${own._id}`, { token: admin });
+
   console.log('\nAnalytics');
   const an = await call('GET', '/analytics/instructor', { token: riya });
   const anReact = an.data.perCourse?.find((c) => c.title === 'React for Beginners');

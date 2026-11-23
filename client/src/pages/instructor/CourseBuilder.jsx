@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../api/api.js';
+import { useAuth } from '../../context/AuthContext.jsx';
 import Loader, { ErrorBox } from '../../components/Loader.jsx';
 
 const EMPTY_LESSON = { title: '', content: '', videoUrl: '', duration: '' };
@@ -37,6 +38,7 @@ function LessonForm({ initial = EMPTY_LESSON, onSave, onCancel, saveLabel = 'Add
 export default function CourseBuilder() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const home = useAuth().user?.role === 'admin' ? '/admin' : '/instructor';
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [notice, setNotice] = useState('');
@@ -133,7 +135,7 @@ export default function CourseBuilder() {
     if (!window.confirm(`Delete "${course.title}"? This also removes its lessons, quizzes, enrolments and attempts.`)) return;
     try {
       await api.del(`/courses/${id}`);
-      navigate('/instructor');
+      navigate(home);
     } catch (err) {
       setError(err);
     }
@@ -141,7 +143,7 @@ export default function CourseBuilder() {
 
   return (
     <div className="builder">
-      <Link to="/instructor" className="muted small">← Dashboard</Link>
+      <Link to={home} className="muted small">← Dashboard</Link>
       <div className="page-head row">
         <div>
           <h1>{course.title} <span className={`badge badge-${course.status}`}>{course.status}</span></h1>

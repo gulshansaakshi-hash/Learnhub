@@ -34,11 +34,11 @@ export default function App() {
           <Route path="/quiz/:quizId" element={guard(['student'], <QuizPage />)} />
 
           <Route path="/instructor" element={guard(['instructor'], <Dashboard />)} />
-          <Route path="/instructor/courses/new" element={guard(['instructor'], <CourseForm />)} />
-          <Route path="/instructor/courses/:id/edit" element={guard(['instructor'], <CourseForm />)} />
-          <Route path="/instructor/courses/:id" element={guard(['instructor'], <CourseBuilder />)} />
-          <Route path="/instructor/courses/:courseId/quiz/new" element={guard(['instructor'], <QuizBuilder />)} />
-          <Route path="/instructor/quiz/:quizId" element={guard(['instructor'], <QuizBuilder />)} />
+          <Route path="/instructor/courses/new" element={guard(['instructor', 'admin'], <CourseForm />)} />
+          <Route path="/instructor/courses/:id/edit" element={guard(['instructor', 'admin'], <CourseForm />)} />
+          <Route path="/instructor/courses/:id" element={guard(['instructor', 'admin'], <CourseBuilder />)} />
+          <Route path="/instructor/courses/:courseId/quiz/new" element={guard(['instructor', 'admin'], <QuizBuilder />)} />
+          <Route path="/instructor/quiz/:quizId" element={guard(['instructor', 'admin'], <QuizBuilder />)} />
 
           <Route path="/admin" element={guard(['admin'], <AdminCourses />)} />
           <Route path="/admin/users" element={guard(['admin'], <AdminUsers />)} />

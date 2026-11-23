@@ -16,6 +16,7 @@ const LINKS = {
   admin: [
     { to: '/', label: 'Browse' },
     { to: '/admin', label: 'Courses' },
+    { to: '/instructor/courses/new', label: 'New Course' },
     { to: '/admin/users', label: 'Users' },
   ],
 };
