@@ -1,4 +1,5 @@
 import Course from '../models/Course.js';
+import User from '../models/User.js';
 import Lesson from '../models/Lesson.js';
 import Enrollment from '../models/Enrollment.js';
 import Quiz from '../models/Quiz.js';
@@ -65,8 +66,18 @@ export const getCourse = asyncHandler(async (req, res) => {
 });
 
 // POST /api/courses — always created as pending
+// Admins may assign any instructor/admin as the course owner.
+const resolveInstructor = async (id) => {
+  const user = await User.findById(id).catch(() => null);
+  if (!user || !['instructor', 'admin'].includes(user.role)) throw new ApiError(400, 'Instructor must be an existing instructor or admin');
+  return user._id;
+};
+
+// POST /api/courses — instructors' courses start pending; admins' are approved
 export const createCourse = asyncHandler(async (req, res) => {
-  const course = await Course.create({ ...pick(req.body), instructor: req.user._id, status: 'pending' });
+  const isAdmin = req.user.role === 'admin';
+  const instructor = isAdmin && req.body?.instructor ? await resolveInstructor(req.body.instructor) : req.user._id;
+  const course = await Course.create({ ...pick(req.body), instructor, status: isAdmin ? 'approved' : 'pending' });
   res.status(201).json({ course });
 });
 
@@ -74,6 +85,7 @@ export const createCourse = asyncHandler(async (req, res) => {
 export const updateCourse = asyncHandler(async (req, res) => {
   const course = await loadOwnedCourse(req.params.id, req.user);
   Object.assign(course, pick(req.body));
+  if (req.user.role === 'admin' && req.body?.instructor) course.instructor = await resolveInstructor(req.body.instructor);
   await course.save();
   res.json({ course });
 });

@@ -40,7 +40,10 @@ export default function AdminCourses() {
     <>
       <div className="page-head row">
         <h1>Admin · Courses</h1>
-        <Link className="btn btn-ghost" to="/admin/users">Manage users →</Link>
+        <div className="row-actions">
+          <Link className="btn" to="/instructor/courses/new">+ New course</Link>
+          <Link className="btn btn-ghost" to="/admin/users">Manage users →</Link>
+        </div>
       </div>
 
       {stats && (
@@ -78,6 +81,7 @@ export default function AdminCourses() {
                   <td>{c.lessonCount}</td>
                   <td><span className={`badge badge-${c.status}`}>{c.status}</span></td>
                   <td className="right row-actions">
+                    <Link className="btn btn-sm btn-ghost" to={`/instructor/courses/${c._id}`}>Manage</Link>
                     {c.status !== 'approved' && (
                       <button className="btn btn-sm btn-success" disabled={busyId === c._id} onClick={() => setCourseStatus(c, 'approved')}>Approve</button>
                     )}
